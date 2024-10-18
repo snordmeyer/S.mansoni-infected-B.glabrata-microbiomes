@@ -1,0 +1,7 @@
+data/
+!data/A1_metadata.txt
+!data/Aim1_SurvivalData.xlsx
+!data/contaminants
+!data/Hm_16s_qPCR.xlsx
+results/
+.ipynb_checkpoints/
