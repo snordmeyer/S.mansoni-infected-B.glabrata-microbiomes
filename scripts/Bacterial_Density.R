@@ -46,7 +46,7 @@ hml_vol <- 40
 #----------------------------------#
 
 # Set slope and y-intercept from qPCR standard curve
-slope <- -4.48 
+slope <- -4.48
 intercept <- 44.719
 
 # Add Quantity to masterfile
@@ -91,14 +91,14 @@ unique_day <- unique(hm$Day)
 if(! dir.exists(results_fd)) { dir.create(results_fd, recursive = TRUE) }
 
 for(group in unique_cohort) {
-  
+
   #subset data
   subset <- hm %>% filter(Cohort == group) %>% summary()
-  
+
   #print results
   print(group)
   print(subset)
-  
+
 }
 
 
@@ -106,7 +106,7 @@ for(group in unique_cohort) {
 ####---Shaprio Test---####
 #------------------------#
 
-hm %>% 
+hm %>%
   group_by(Day, Cohort) %>%
   shapiro_test(Norm_Quant) # if p > 0.05, data is normal ; if not, deviates from normal distribution
 
@@ -122,23 +122,23 @@ day_res <- vector("list")
 for(group in unique_cohort) {
   # Subset the data for the current cohort
   subset <- hm %>% filter(Cohort == group)
-  
+
   # Kruskal Wallis test
   kruskal_res <- kruskal.test(Norm_Quant ~ Day, data = subset)
-  
+
   # Dunn's post hoc test
   posthoc <- dunnTest(Norm_Quant ~ Day, data = subset)
   PT <- posthoc$res
   letters <- cldList(comparison = PT$Comparison,
                      p.value = PT$P.adj,
                      threshold = 0.05)
-  
+
   # Save results
   cohort_res[[paste("Cohort", group)]] <- list(Kruskal_Wallis = kruskal_res,
                                                Dunn_PostHoc = posthoc,
                                                PT = PT,
                                                Letters = letters)
-  
+
 }
 
 cohort_res
@@ -147,17 +147,17 @@ cohort_res
 for(day in unique_day) {
   # Subset the data for the current day
   subset <- hm %>% filter(Day == day)
-  
+
   # Kruskal Wallis test
   #kruskal_res <- kruskal.test(Norm_Quant ~ Cohort, data = subset)
   result <- wilcox.test(Norm_Quant ~ Cohort, data = subset, correct = TRUE, exact = FALSE)
-  
+
   # Save results
   #day_res[[paste("Day", day)]] <- list(Kruskal_Wallis = kruskal_res)
   day_res[[paste("Day", day)]] <- data.frame(
     Statistic = result$statistic,
     P.Value = result$p.value)
-  
+
 }
 
 day_res
@@ -168,7 +168,7 @@ Control_letters <- cohort_res$`Cohort Control`$Letters[1:2]
 Control_letters <- Control_letters %>% mutate(Cohort = "Control") %>% mutate(Group = if_else(Group == "", "0", Group))
 
 Exposed_letters <- cohort_res$`Cohort Exposed`$Letters[1:2]
-Exposed_letters <- Exposed_letters %>% mutate(Cohort = "Exposed") %>% mutate(Group = if_else(Group == "", "0", Group))
+Exposed_letters <- Exposed_letters %>% mutate(Cohort = "Exposed") %>% mutate(Group = if_else(Group == "", "0", Group)) %>% mutate(Letter = paste0(Letter, "'"))
 
 day_positions <- data.frame(
   Day = levels(hm$Day),  # Get levels of Day
@@ -191,9 +191,9 @@ hm_plot <- ggplot(hm, aes(x = Day, y = Norm_Quant, color = Cohort)) +
   geom_boxplot(size = 0.7) +
   scale_y_log10() +
   scale_color_manual(values = cohort_cols) +
-  labs(y = "16s copies/μL") +
-  geom_vline(xintercept = 1.5, linetype = "dashed", color = "black", size = 0.7) + 
-  geom_text(data = dunn_letters, aes(x = x_adjusted, y = 1e+06, 
+  labs(y = "16s rDNA gene copies/µL") +
+  geom_vline(xintercept = 1.5, linetype = "dashed", color = "black", size = 0.7) +
+  geom_text(data = dunn_letters, aes(x = x_adjusted, y = 1e+06,
                                      label = Letter, color = Cohort),
             size = 5, fontface = "bold", show.legend = FALSE) +
   theme(plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
@@ -221,10 +221,10 @@ copies <- vector("list")
 for(group in unique_cohort) {
 	# Subset the data for the current cohort
 	subset <- hm %>% filter(Cohort == group) %>% na.omit()
-	
+
 	# Use MSE function for mean and standard error
 	average <- MSE(subset$Norm_Quant)
-	
+
 	# Save results
 	copies[[paste("Cohort", group)]] <- list(Cohort = group, Average = average)
 }
