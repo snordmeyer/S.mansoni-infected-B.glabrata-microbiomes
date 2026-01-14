@@ -22,7 +22,7 @@ mybiom2 <- readRDS(paste0(data_fd, "mybiom2.rds"))
 cohort_cols <- c("#2C7800", "#b54e5d")
 
 # Print plots as pdf
-pdf(paste0(results_fd, "Figure3.pdf"), width = 8, height = 8)
+pdf(paste0(results_fd, "SuppFigure3.pdf"), width = 8, height = 8)
 
 rc <- ggrare(mybiom2, step = 1000, color = "Cohort", se = FALSE, plot=FALSE) +
   geom_line(size = 0.75) +
